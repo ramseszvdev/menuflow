@@ -1,0 +1,236 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String      @id @default(cuid())
+  email          String      @unique
+  name           String?
+  hashedPassword String?
+  role           String      @default("owner")
+  restaurantId   String?
+  restaurant     Restaurant? @relation(fields: [restaurantId], references: [id])
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  stripeCustomerId String?  @unique
+  subscriptions    Subscription[]
+
+  @@map("users")
+}
+
+model Restaurant {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  address   String?
+  plan      String   @default("basic")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  subscriptions Subscription[]
+  uberEatsStoreId     String?
+  uberEatsAccessToken String?
+  glovoStoreId        String?
+  glovoAccessToken    String?
+
+  users          User[]
+  ingredients    Ingredient[]
+  recipes        Recipe[]
+  menus          Menu[]
+  suppliers      Supplier[]
+  purchaseOrders PurchaseOrder[]
+
+  @@map("restaurants")
+}
+
+model Ingredient {
+  id           String     @id @default(cuid())
+  name         String
+  unit         String // kg, g, l, ml, unidad
+  costPerUnit  Float
+  stock        Float      @default(0)
+  minStock     Float      @default(0)
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  recipeIngredients   RecipeIngredient[]
+  supplierIngredients SupplierIngredient[]
+  purchaseOrderItems  PurchaseOrderItem[]
+
+  @@map("ingredients")
+}
+
+model Recipe {
+  id              String     @id @default(cuid())
+  name            String
+  description     String?
+  sellingPrice    Float
+  preparationTime Int? // minutos
+  profitMargin    Float? // calculado automáticamente
+  restaurantId    String
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  ingredients RecipeIngredient[]
+  menuRecipes MenuRecipe[]
+
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id           String     @id @default(cuid())
+  recipeId     String
+  recipe       Recipe     @relation(fields: [recipeId], references: [id])
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  quantity     Float // cantidad necesaria para la receta
+
+  @@unique([recipeId, ingredientId])
+  @@map("recipe_ingredients")
+}
+
+model Menu {
+  id           String     @id @default(cuid())
+  name         String
+  description  String?
+  validFrom    DateTime
+  validTo      DateTime?
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  recipes MenuRecipe[]
+
+  @@map("menus")
+}
+
+model MenuRecipe {
+  id       String @id @default(cuid())
+  menuId   String
+  menu     Menu   @relation(fields: [menuId], references: [id])
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  order    Int    @default(0)
+
+  @@unique([menuId, recipeId])
+  @@map("menu_recipes")
+}
+
+model Supplier {
+  id           String     @id @default(cuid())
+  name         String
+  contactName  String?
+  email        String?
+  phone        String?
+  address      String?
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  ingredients    SupplierIngredient[]
+  purchaseOrders PurchaseOrder[]
+
+  @@map("suppliers")
+}
+
+model SupplierIngredient {
+  id           String     @id @default(cuid())
+  supplierId   String
+  supplier     Supplier   @relation(fields: [supplierId], references: [id])
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  price        Float
+  minOrder     Float?
+  leadTime     Int? // días
+
+  @@unique([supplierId, ingredientId])
+  @@map("supplier_ingredients")
+}
+
+model PurchaseOrder {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  supplierId   String
+  supplier     Supplier   @relation(fields: [supplierId], references: [id])
+  total        Float
+  status       String     @default("pending") // pending, confirmed, received, cancelled
+  expectedDate DateTime?
+  receivedDate DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  items PurchaseOrderItem[]
+
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id           String        @id @default(cuid())
+  orderId      String
+  order        PurchaseOrder @relation(fields: [orderId], references: [id])
+  ingredientId String
+  ingredient   Ingredient    @relation(fields: [ingredientId], references: [id])
+  quantity     Float
+  price        Float
+  total        Float
+
+  @@map("purchase_order_items")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PAST_DUE
+  TRAILING
+}
+
+model Subscription {
+  id                    String   @id @default(cuid())
+  stripeSubscriptionId  String   @unique
+  stripeCustomerId      String
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id])
+  restaurantId          String
+  restaurant            Restaurant @relation(fields: [restaurantId], references: [id])
+  plan                  String   // basic, pro, enterprise
+  status                SubscriptionStatus   @default(ACTIVE)
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+  cancelAtPeriodEnd     Boolean  @default(false)
+  cancelledAt           DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  invoices Invoice[]
+
+  @@index([restaurantId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id               String   @id @default(cuid())
+  stripeInvoiceId  String   @unique
+  subscriptionId   String
+  subscription     Subscription @relation(fields: [subscriptionId], references: [id])
+  amount           Float
+  currency         String   @default("usd")
+  status           String   // paid, failed, pending
+  invoiceUrl       String?
+  paidAt           DateTime?
+  createdAt        DateTime @default(now())
+
+  @@map("invoices")
+}
