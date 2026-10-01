@@ -185,6 +185,7 @@ export default function IngredientsPage() {
 								</Label>
 								<Input
 									id="ingredient-name"
+									className="px-2 py-1 w-full selection:bg-orange-500 selection:text-white"
 									placeholder="Ej. Queso Mozzarella"
 									required
 									value={form.name}
@@ -200,6 +201,7 @@ export default function IngredientsPage() {
 								</Label>
 								<Input
 									id="ingredient-unit"
+									className="px-2 py-1 w-full selection:bg-orange-500 selection:text-white"
 									placeholder="Ej. kg, g, litros, unidad"
 									required
 									value={form.unit}
@@ -215,6 +217,7 @@ export default function IngredientsPage() {
 									<Input
 										id="ingredient-cost"
 										type="number"
+										className="px-2 py-1 w-20 selection:bg-orange-500 selection:text-white"
 										min="0"
 										step="0.01"
 										placeholder="0.00"
@@ -233,6 +236,7 @@ export default function IngredientsPage() {
 									<Input
 										id="ingredient-stock"
 										type="number"
+										className="px-2 py-1 w-20 selection:bg-orange-500 selection:text-white"
 										min="0"
 										step="0.01"
 										placeholder="0"
@@ -247,6 +251,7 @@ export default function IngredientsPage() {
 									<Input
 										id="ingredient-min-stock"
 										type="number"
+										className="px-2 py-1 w-20 selection:bg-orange-500 selection:text-white"
 										min="0"
 										step="0.01"
 										placeholder="0"
@@ -264,7 +269,7 @@ export default function IngredientsPage() {
 							<DialogFooter className="pt-4">
 								<Button
 									type="submit"
-									className="w-full"
+									className="w-full h-11 bg-linear-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:amber-700 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-50"
 									disabled={createIngredient.isPending}
 								>
 									{createIngredient.isPending ? (
@@ -358,7 +363,8 @@ export default function IngredientsPage() {
 										<Button
 											variant="ghost"
 											size="icon"
-											className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+											title="Eliminar ingrediente"
+											className="text-red-500 hover:text-red-700"
 											aria-label={`Eliminar ${ingredient.name}`}
 											onClick={() =>
 												removeIngredient.mutate(ingredient.id)

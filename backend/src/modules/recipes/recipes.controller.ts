@@ -1,7 +1,17 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
+import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentRestaurantId } from '../../common/decorator/current-restaurant.decorator';
 import { CurrentUser } from '../../common/decorator/current-user.decorator';
@@ -30,5 +40,36 @@ export class RecipesController {
     @CurrentUser('id') userId: string,
   ) {
     return this.recipesService.findAll(userId, restaurantId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener una receta por ID' })
+  findOne(
+    @CurrentRestaurantId() restaurantId: string,
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.recipesService.findOne(userId, restaurantId, id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualizar una receta' })
+  update(
+    @CurrentRestaurantId() restaurantId: string,
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateRecipeDto,
+  ) {
+    return this.recipesService.update(userId, restaurantId, id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar una receta' })
+  remove(
+    @CurrentRestaurantId() restaurantId: string,
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.recipesService.remove(userId, restaurantId, id);
   }
 }

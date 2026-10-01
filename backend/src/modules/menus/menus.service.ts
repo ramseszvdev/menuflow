@@ -278,8 +278,16 @@ export class MenusService {
       throw new NotFoundException(`Menú con ID ${id} no encontrado`);
     }
 
-    return this.prisma.menu.delete({
-      where: { id },
+    // La FK menu_recipes_menuId_fkey es RESTRICT: hay que borrar primero
+    // las filas hijas (menu_recipes) y luego el menú, en una transacción.
+    return this.prisma.$transaction(async (prisma) => {
+      await prisma.menuRecipe.deleteMany({
+        where: { menuId: id },
+      });
+
+      return prisma.menu.delete({
+        where: { id },
+      });
     });
   }
 

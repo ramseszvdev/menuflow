@@ -11,6 +11,7 @@ import {
 	Loader2,
 	DollarSign,
 	Utensils,
+	Trash2,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
@@ -101,6 +102,16 @@ export default function RecipesPage() {
 			toast.error(getErrorMessage(error, 'No se pudo crear la receta')),
 	});
 
+	const removeRecipe = useMutation({
+		mutationFn: (id: string) => apiClient.delete(`/recipes/${id}`),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['recipes', restaurantId] });
+			toast.success('Receta eliminada');
+		},
+		onError: (error: unknown) =>
+			toast.error(getErrorMessage(error, 'No se pudo eliminar la receta')),
+	});
+
 	if (status === 'loading') {
 		return (
 			<div className="flex h-64 items-center justify-center space-x-2 text-muted-foreground">
@@ -172,6 +183,7 @@ export default function RecipesPage() {
 								<Input
 									id="recipe-name"
 									placeholder="Ej. Hamburguesa Gourmet Trufada"
+									className="pt-1 pb-1 pr-2 pl-2 w-full selection:bg-orange-500 selection:text-white"
 									required
 									value={form.name}
 									onChange={(event) =>
@@ -188,6 +200,7 @@ export default function RecipesPage() {
 									<Input
 										id="recipe-price"
 										type="number"
+										className="pt-1 pb-1 pr-2 pl-2 w-35 selection:bg-orange-500 selection:text-white"
 										min="0"
 										step="0.01"
 										placeholder="0.00"
@@ -206,6 +219,7 @@ export default function RecipesPage() {
 									<Input
 										id="recipe-time"
 										type="number"
+										className="px-1 py-2 w-25 selection:bg-orange-500 selection:text-white"
 										min="0"
 										placeholder="Ej. 20"
 										value={form.preparationTime}
@@ -225,6 +239,7 @@ export default function RecipesPage() {
 								</Label>
 								<Input
 									id="recipe-description"
+									className="px-1 py-2 w-full selection:bg-orange-500 selection:text-white"
 									placeholder="Breve descripción o notas del platillo..."
 									value={form.description}
 									onChange={(event) =>
@@ -239,7 +254,7 @@ export default function RecipesPage() {
 							<DialogFooter className="pt-4">
 								<Button
 									type="submit"
-									className="w-full"
+									className="w-full h-11 bg-linear-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:amber-700 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-50"
 									disabled={createRecipe.isPending}
 								>
 									{createRecipe.isPending ? (
@@ -326,11 +341,24 @@ export default function RecipesPage() {
 										<span className="text-xs text-muted-foreground font-medium">
 											Precio Venta
 										</span>
-										<div className="flex items-center text-lg font-bold text-foreground">
-											<DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400 -mr-1" />
-											{recipe.sellingPrice.toFixed(2)}
+										<div className="flex items-center gap-2">
+											<div className="flex items-center text-lg font-bold text-foreground">
+												<DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400 -mr-1" />
+												{recipe.sellingPrice.toFixed(2)}
+											</div>
 										</div>
 									</div>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="text-red-500 hover:text-red-700 hover:bg-destructive/10 m-auto"
+										title="Eliminar receta"
+										aria-label={`Eliminar ${recipe.name}`}
+										onClick={() => removeRecipe.mutate(recipe.id)}
+										disabled={removeRecipe.isPending}
+									>
+										<Trash2 className="h-4 w-4" />
+									</Button>
 								</div>
 							))}
 						</div>

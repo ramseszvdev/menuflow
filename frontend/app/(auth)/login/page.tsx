@@ -65,7 +65,7 @@ export default function LoginPage() {
 
 			<Card className="relative w-full max-w-md glass-card border-white/10 dark:border-white/10 shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden transition-all duration-300 hover:border-orange-500/30">
 				{/* Barra superior con gradiente decorativo */}
-				<div className="h-1.5 w-full bg-linear-to-r from-amber-500 via-orange-500 to-rose-500" />
+				<div className="h-2 w-full bg-linear-to-r from-amber-500 via-orange-500 to-rose-500" />
 
 				<CardHeader className="space-y-2 text-center pt-8 pb-4">
 					<div className="inline-flex items-center justify-center gap-2 text-3xl font-black tracking-tight text-foreground mb-1">

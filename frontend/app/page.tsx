@@ -55,7 +55,7 @@ export default function Home() {
 			.map((n) => n[0])
 			.join('')
 			.toUpperCase()
-			.slice(0, 2);
+			.slice(0, 3);
 	};
 
 	return (
@@ -93,7 +93,6 @@ export default function Home() {
 						</Link>
 					</nav>
 
-					{/* Estado de autenticación corregido */}
 					<div className="flex items-center gap-3">
 						{status === 'loading' ? (
 							<div className="flex items-center justify-center h-10 w-10">
@@ -105,9 +104,9 @@ export default function Home() {
 								<DropdownMenuTrigger asChild>
 									<Button
 										variant="ghost"
-										className="relative h-10 w-10 rounded-full border border-orange-500/20 hover:bg-orange-500/10 focus-visible:ring-orange-500 cursor-pointer p-0"
+										className="relative h-12 w-12 rounded-full border border-orange-500/20 hover:bg-orange-500/10 focus-visible:ring-orange-500 cursor-pointer p-0"
 									>
-										<Avatar className="h-9 w-9">
+										<Avatar className="h-11 w-11">
 											<AvatarImage
 												src={session.user.image || ''}
 												alt={session.user.name || 'Usuario'}
@@ -357,12 +356,12 @@ export default function Home() {
 							</div>
 
 							<div className="absolute -top-4 -right-2 sm:-right-4 animate-bounce">
-								<Badge className="bg-emerald-500 text-white font-bold border-0 px-3 py-1.5 shadow-lg shadow-emerald-500/30 rounded-xl">
+								<Badge className="bg-emerald-500 text-white font-bold border-0 px-3 py-1.5 shadow-lg shadow-emerald-500/30 rounded-xl hover:bg-emerald-400">
 									🚀 +25% Ganancias
 								</Badge>
 							</div>
 							<div className="absolute -bottom-4 -left-2 sm:-left-4 animate-bounce [animation-delay:1000ms]">
-								<Badge className="bg-sky-500 text-white font-bold border-0 px-3 py-1.5 shadow-lg shadow-sky-500/30 rounded-xl">
+								<Badge className="bg-sky-500 text-white font-bold border-0 px-3 py-1.5 shadow-lg shadow-sky-500/30 rounded-xl hover:bg-sky-400">
 									⚡ Ahorra 10h/semana
 								</Badge>
 							</div>

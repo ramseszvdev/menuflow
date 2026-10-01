@@ -106,11 +106,14 @@ export function MenuBuilder({ restaurantId }: { restaurantId: string }) {
 			const response = await apiClient.get<ApiResponse<Menu[]>>(
 				`/restaurants/${restaurantId}/menus`
 			);
-			return response.data.data;
+			return response.data.data ?? (response.data as unknown as Menu[]);
 		},
+		enabled: Boolean(restaurantId),
 	});
 
 	// Obtener todas las recetas (para el selector)
+	// OJO: el backend expone GET /recipes (restaurantId va en el JWT),
+	// no existe GET /restaurants/:id/recipes y por eso devolvía 404.
 	const {
 		data: recipes,
 		isLoading: recipesLoading,
@@ -119,11 +122,11 @@ export function MenuBuilder({ restaurantId }: { restaurantId: string }) {
 	} = useQuery<Recipe[]>({
 		queryKey: ['recipes', restaurantId],
 		queryFn: async () => {
-			const response = await apiClient.get<ApiResponse<Recipe[]>>(
-				`/restaurants/${restaurantId}/recipes`
-			);
-			return response.data.data;
+			const response =
+				await apiClient.get<ApiResponse<Recipe[]>>('/recipes');
+			return response.data.data ?? (response.data as unknown as Recipe[]);
 		},
+		enabled: Boolean(restaurantId),
 	});
 
 	// Crear menú
@@ -274,7 +277,10 @@ export function MenuBuilder({ restaurantId }: { restaurantId: string }) {
 				<h2 className="text-2xl font-bold">Mis Menús</h2>
 				<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 					<DialogTrigger asChild>
-						<Button className="bg-orange-400 transition-all hover:bg-amber-400 cursor-pointer">
+						<Button
+							className="bg-orange-400 transition-all hover:bg-amber-400 
+						cursor-pointer"
+						>
 							<Plus className="mr-2 h-4 w-4" /> Nuevo Menú
 						</Button>
 					</DialogTrigger>
@@ -290,6 +296,7 @@ export function MenuBuilder({ restaurantId }: { restaurantId: string }) {
 								<Label htmlFor="menuName">Nombre del Menú</Label>
 								<Input
 									id="menuName"
+									className="pt-1 pb-1 pr-2 pl-2 w-full selection:bg-orange-500 selection:text-white"
 									value={newMenuName}
 									onChange={(e) => setNewMenuName(e.target.value)}
 									placeholder="Ej: Menú de Verano 2026"
@@ -345,12 +352,13 @@ export function MenuBuilder({ restaurantId }: { restaurantId: string }) {
 						<div className="flex justify-end space-x-2">
 							<Button
 								variant="outline"
+								className="hover:bg-gray-300 cursor-pointer"
 								onClick={() => setIsDialogOpen(false)}
 							>
 								Cancelar
 							</Button>
 							<Button
-								className="bg-orange-600 hover:bg-orange-700"
+								className="bg-orange-400 hover:bg-orange-500 hover:text-white cursor-pointer"
 								onClick={handleCreateMenu}
 								disabled={createMenuMutation.isPending}
 							>

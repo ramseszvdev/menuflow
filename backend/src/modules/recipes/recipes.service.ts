@@ -234,8 +234,17 @@ export class RecipesService {
       );
     }
 
-    return this.prisma.recipe.delete({
-      where: { id },
+    // Las FKs recipe_ingredients_recipeId_fkey y menu_recipes son RESTRICT:
+    // hay que borrar primero las filas hijas (recipe_ingredients) y luego
+    // la receta, en una transacción para no dejar datos inconsistentes.
+    return this.prisma.$transaction(async (tx) => {
+      await tx.recipeIngredient.deleteMany({
+        where: { recipeId: id },
+      });
+
+      return tx.recipe.delete({
+        where: { id },
+      });
     });
   }
 

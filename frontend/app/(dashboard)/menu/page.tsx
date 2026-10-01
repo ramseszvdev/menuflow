@@ -1,11 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import {
-	UtensilsCrossed,
-	ClipboardList,
-	Store,
-	ArrowRight,
-} from 'lucide-react';
+import { ClipboardList, Store, ArrowRight } from 'lucide-react';
 import { authOptions } from '@/lib/auth-options';
 import { MenuBuilder } from '@/components/menu/menu-builder';
 import { Card, CardContent } from '@/components/ui/card';

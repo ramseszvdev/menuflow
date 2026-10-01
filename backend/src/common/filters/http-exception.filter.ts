@@ -18,6 +18,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const isHttpException = exception instanceof HttpException;
     const isPrismaKnownError =
       exception instanceof Prisma.PrismaClientKnownRequestError;
+    const isPrismaUnknownRequestError =
+      typeof (Prisma as unknown as Record<string, unknown>)
+        .PrismaClientUnknownRequestError === 'function' &&
+      exception instanceof
+        (Prisma as unknown as {
+          PrismaClientUnknownRequestError: new (...args: never[]) => Error;
+        }).PrismaClientUnknownRequestError;
     const isPrismaValidationError =
       exception instanceof Prisma.PrismaClientValidationError;
     const isPrismaInitializationError =
@@ -49,6 +56,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
     } else if (isPrismaValidationError) {
       status = HttpStatus.BAD_REQUEST;
       exceptionResponse = 'Datos inválidos para la operación de base de datos';
+    } else if (isPrismaUnknownRequestError) {
+      // Ej: borrar un menú con recetas asociadas (FK RESTRICT de Postgres,
+      // código 23001). No debe ser un 500 sin mensaje útil.
+      const rawMessage = exception instanceof Error ? exception.message : '';
+      const isForeignKeyViolation =
+        rawMessage.includes('23001') ||
+        rawMessage.includes('violates RESTRICT') ||
+        rawMessage.includes('Foreign key constraint') ||
+        rawMessage.includes('menu_recipes_menuId_fkey');
+      status = isForeignKeyViolation
+        ? HttpStatus.BAD_REQUEST
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+      exceptionResponse = isForeignKeyViolation
+        ? 'No se puede completar la operación porque el registro tiene datos relacionados'
+        : 'Error de base de datos';
     } else if (isPrismaInitializationError) {
       status = HttpStatus.SERVICE_UNAVAILABLE;
       exceptionResponse =

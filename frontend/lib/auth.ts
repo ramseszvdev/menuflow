@@ -34,15 +34,27 @@ export interface ApiResponse<T> {
 }
 
 export function getErrorMessage(error: unknown, fallback: string): string {
-	if (error instanceof Error) {
-		return error.message;
+	if (isAxiosError(error)) {
+		const data = error.response?.data;
+		if (typeof data === 'object' && data !== null && 'message' in data) {
+			const raw = (data as { message?: unknown }).message;
+			if (typeof raw === 'string' && raw.trim().length > 0) return raw;
+			if (Array.isArray(raw)) {
+				const first = raw.find((m) => typeof m === 'string');
+				if (typeof first === 'string') return first;
+			}
+		}
+		if (error.response?.status === 404) {
+			return 'Recurso no encontrado (404). Revisa la URL del API.';
+		}
+		if (typeof error.message === 'string' && error.message.trim().length > 0) {
+			return error.message;
+		}
+		return fallback;
 	}
 
-	if (isAxiosError(error)) {
-		const message = error.response?.data;
-		if (typeof message === 'object' && message !== null && 'message' in message) {
-			return typeof message.message === 'string' ? message.message : fallback;
-		}
+	if (error instanceof Error) {
+		return error.message;
 	}
 
 	return fallback;
