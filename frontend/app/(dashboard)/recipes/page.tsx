@@ -200,7 +200,7 @@ export default function RecipesPage() {
 									<Input
 										id="recipe-price"
 										type="number"
-										className="pt-1 pb-1 pr-2 pl-2 w-35 selection:bg-orange-500 selection:text-white"
+										className="px-2 py-1 w-35 selection:bg-orange-500 selection:text-white"
 										min="0"
 										step="0.01"
 										placeholder="0.00"
@@ -219,7 +219,7 @@ export default function RecipesPage() {
 									<Input
 										id="recipe-time"
 										type="number"
-										className="px-1 py-2 w-25 selection:bg-orange-500 selection:text-white"
+										className="px-2 py-1 w-25 selection:bg-orange-500 selection:text-white"
 										min="0"
 										placeholder="Ej. 20"
 										value={form.preparationTime}
@@ -239,7 +239,7 @@ export default function RecipesPage() {
 								</Label>
 								<Input
 									id="recipe-description"
-									className="px-1 py-2 w-full selection:bg-orange-500 selection:text-white"
+									className="px-2 py-1 w-full selection:bg-orange-500 selection:text-white"
 									placeholder="Breve descripción o notas del platillo..."
 									value={form.description}
 									onChange={(event) =>
